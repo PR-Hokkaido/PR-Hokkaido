@@ -1,0 +1,82 @@
+[
+    {
+        "id": "d00e4229.3ceef",
+        "type": "tab",
+        "label": "フロー 2",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "c087d624.1b88",
+        "type": "comment",
+        "z": "d00e4229.3ceef",
+        "name": "打音の集音",
+        "info": "",
+        "x": 100,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "65644b3a.47564c",
+        "type": "http in",
+        "z": "d00e4229.3ceef",
+        "name": "/pr-hokkaido-classification",
+        "url": "/pr-hokkiado-classification",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "88e2785b.c5e3d"
+            ]
+        ]
+    },
+    {
+        "id": "88e2785b.c5e3d",
+        "type": "template",
+        "z": "d00e4229.3ceef",
+        "name": "打音収集",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "plain",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>打音判定</title>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css\">\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n    <script>\n    $(function() {\n  $('#btn_start_recording').on('click', function(){\n    startRecording();\n  });\n\n  $('#btn_stop_recording').on('click', function(){\n    endRecording();\n  })\n})\n // ///////////////////////////////////////////\n // 録音関係\n // ///////////////////////////////////////////\n\n // 変数定義\n let localMediaStream = null;\n let localScriptProcessor = null;\n let audioSampleRate = null;\n let audioContext = null;\n let bufferSize = 1024;\n let audioData = []; // 録音データ\n let recordingFlg = false;\n\n // 録音バッファ作成（録音中自動で繰り返し呼び出される）\n function onAudioProcess(e) {\n     if (!recordingFlg) return;\n     console.log('onAudioProcess');\n\n     // 音声のバッファを作成\n     let input = e.inputBuffer.getChannelData(0);\n     let bufferData = new Float32Array(bufferSize);\n     for (let i = 0; i < bufferSize; i++) {\n         bufferData[i] = input[i];\n     }\n     audioData.push(bufferData);\n }\n\n // 解析開始\n function startRecording(evt_stream) {\n     // 画面アクセス時にマイクを取得\n     console.log('startRecording');\n     recordingFlg = true;\n\n     // 取得されている音声ストリームの録音を開始\n     localMediaStream = evt_stream;\n\n     if (!navigator || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {\n       alert('Missing support for navigator.mediaDevices.getUserMedia') // temp: helps when testing for strange issues on ios/safari\n       return\n     }\n\n     audioContext = new (window.AudioContext || window.webkitAudioContext)();\n     // サンプルレートを保持しておく\n     audioSampleRate = audioContext.sampleRate;\n\n     let scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);\n     localScriptProcessor = scriptProcessor;\n\n     if (audioContext.createMediaStreamDestination) {\n       destinationNode = audioContext.createMediaStreamDestination()\n     }\n     else {\n       destinationNode = audioContext.destination\n     }\n\n     // safariで Web Audio APIを動かすため、先にaudioContextを生成し、UserMediaを生成する\n     return navigator.mediaDevices.getUserMedia({audio: true})\n       .then((stream) => {\n         this._startRecordingWithStream(stream, destinationNode, scriptProcessor)\n       })\n       .catch((error) => {\n         alert('Error with getUserMedia: ' + error.message) // temp: helps when testing for strange issues on ios/safari\n         console.log(error)\n       })\n   }\n\n   function _startRecordingWithStream(stream, destinationNode, scriptProcessor) {\n     // ループ処理のセット\n     let mediastreamsource = audioContext.createMediaStreamSource(stream);\n     mediastreamsource.connect(scriptProcessor);\n     scriptProcessor.onaudioprocess = onAudioProcess;\n     console.log('startRecording scriptProcessor.connect(audioContext.destination)');\n     scriptProcessor.connect(destinationNode);\n   }\n\n // 解析終了\n function endRecording() {\n     console.log('endRecording');\n     recordingFlg = false;\n     // console.log('audioData');\n     // console.log(audioData);\n\n     // console.log('blob = exportWAV(audioData)');\n     // 録音できたので録音データをwavにしてinputに配置＆再生ボタンに登録\n     let blob = exportWAV(audioData);\n     // データ送信用のinputタグを取得\n     let wave_tag = document.getElementById('demo_speaking_wave_file');\n\n     // base64加工\n     let reader = new FileReader();\n     reader.readAsDataURL(blob);\n     reader.onloadend = function() {\n         base64data = reader.result;\n         // console.log('base64data');\n         // console.log(base64data);\n        wave_tag.value = base64data;\n     };\n\n     let myURL = window.URL || window.webkitURL;\n     let url = myURL.createObjectURL(blob);\n     var dl = document.querySelector(\"#dl\");\n\n     //集音したものから音声データを作成する\n     dl.href = myURL.createObjectURL(blob);\n     dl.download = 'sample.wav';\n     // console.log('wavefile');\n     // console.log(url);\n\n     // audioタグに録音データをセット\n     let player = document.getElementById('player');\n     player.src =  url;\n     player.load();\n\n     // audioDataをクリア\n     localMediaStream = null;\n     localScriptProcessor = null;\n     audioContext.close()\n     audioContext = null;\n     audioData = []; // 録音データ\n }\n\n // ///////////////////////////////////////////\n // waveファイル作成処理\n // ///////////////////////////////////////////\n\n function exportWAV(audioData) {\n\n     let encodeWAV = function(samples, sampleRate) {\n         let buffer = new ArrayBuffer(44 + samples.length * 2);\n         let view = new DataView(buffer);\n\n         let writeString = function(view, offset, string) {\n             for (let i = 0; i < string.length; i++){\n                 view.setUint8(offset + i, string.charCodeAt(i));\n             }\n         };\n\n         let floatTo16BitPCM = function(output, offset, input) {\n             for (let i = 0; i < input.length; i++, offset += 2){\n                 let s = Math.max(-1, Math.min(1, input[i]));\n                 output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);\n             }\n         };\n\n         writeString(view, 0, 'RIFF');  // RIFFヘッダ\n         view.setUint32(4, 32 + samples.length * 2, true); // これ以降のファイルサイズ\n         writeString(view, 8, 'WAVE'); // WAVEヘッダ\n         writeString(view, 12, 'fmt '); // fmtチャンク\n         view.setUint32(16, 16, true); // fmtチャンクのバイト数\n         view.setUint16(20, 1, true); // フォーマットID\n         view.setUint16(22, 1, true); // チャンネル数\n         view.setUint32(24, sampleRate, true); // サンプリングレート\n         view.setUint32(28, sampleRate * 2, true); // データ速度\n         view.setUint16(32, 2, true); // ブロックサイズ\n         view.setUint16(34, 16, true); // サンプルあたりのビット数\n         writeString(view, 36, 'data'); // dataチャンク\n         view.setUint32(40, samples.length * 2, true); // 波形データのバイト数\n         floatTo16BitPCM(view, 44, samples); // 波形データ\n\n         return view;\n     };\n\n     let mergeBuffers = function(audioData) {\n         let sampleLength = 0;\n         for (let i = 0; i < audioData.length; i++) {\n             sampleLength += audioData[i].length;\n         }\n         let samples = new Float32Array(sampleLength);\n         let sampleIdx = 0;\n         for (let i = 0; i < audioData.length; i++) {\n             for (let j = 0; j < audioData[i].length; j++) {\n                 samples[sampleIdx] = audioData[i][j];\n                 sampleIdx++;\n             }\n         }\n         return samples;\n     };\n\n     let dataview = encodeWAV(mergeBuffers(audioData), audioSampleRate);\n     let audioBlob = new Blob([dataview], { type: 'audio/wav' });\n\n     return audioBlob;\n\n     // let myURL = window.URL || window.webkitURL;\n     // let url = myURL.createObjectURL(audioBlob);\n     // return url;\n }\n\n function audioPlay() {\n     let play_button = document.getElementById(\"btn_play_pause\");\n     play_button.onclick = new Function(\"audioPause();\");\n     play_button.innerText = \"停止\";\n     document.getElementById(\"player\").play();\n }\n\n function audioPause() {\n     let play_button = document.getElementById(\"btn_play_pause\");\n     play_button.onclick = new Function(\"audioPlay();\");\n     play_button.innerText = \"再生\";\n     document.getElementById(\"player\").pause();\n }\n    \n    </script>\n    <style type=\"text/css\">\n    <!--\n    .box3 {\n    padding: 0.5em 1em;\n    margin: 2em 0;\n    color: #2c2c2f;\n    background: #cde4ff;/*背景色*/\n    }\n    .box3 p {\n    margin: 0; \n    padding: 0;\n    }\n　　example {\n    margin: 10px auto;\n    width:50px;\n    background: orange;\n    }\n    \n    --> \n    </style>\n  </head>\n  <body>\n　　<center>\n　　<div class=\"box3\">\n    <p><h1>打音の判定</h1></p>\n    </div>\n    \n  　<p>レコード開始実行と同時に録音がはじまり、レコード停止後に音声データを生成します</p>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"start_recording\" id=\"btn_start_recording\">レコード開始</button><br><br><br>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"stop_recording\" id=\"btn_stop_recording\">ストップ</button><br><br><br>\n    <audio id=\"player\" controls></audio><br><br><br>\n    <a id=\"dl\">ダウンロード</a>\n　　</center>\n  </body>\n</html>",
+        "output": "str",
+        "x": 380,
+        "y": 120,
+        "wires": [
+            [
+                "e09b9468.47c52",
+                "e8e6cb37.4951d8"
+            ]
+        ]
+    },
+    {
+        "id": "e09b9468.47c52",
+        "type": "http response",
+        "z": "d00e4229.3ceef",
+        "name": "http response",
+        "statusCode": "",
+        "headers": {},
+        "x": 620,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "e8e6cb37.4951d8",
+        "type": "debug",
+        "z": "d00e4229.3ceef",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 580,
+        "y": 220,
+        "wires": []
+    }
+]
