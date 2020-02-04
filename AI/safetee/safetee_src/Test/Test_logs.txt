@@ -1,0 +1,35 @@
+Test Start : Test.vbs
+<Section num='1'/>
+<Section num='2'/>
+==========================================================
+((( [Test\Test.vbs] - test_build )))
+>SetVar  "devenv_ver_name", "vs2008"
+>devenv.exe "..\safetee.sln" /rebuild Debug
+ (if cl.exe was already run background by stop build, it may be fail.)
+>devenv.exe "..\safetee.sln" /rebuild Release
+ (if cl.exe was already run background by stop build, it may be fail.)
+Pass.
+<Section num='3'/>
+==========================================================
+((( [Test\Test.vbs] - test_setup )))
+Pass.
+<Section num='4'/>
+==========================================================
+((( [Test\Test.vbs] - test_start )))
+((( [safetee Test1...bat] )))
+This is ManualTest.
+Pass.
+<Section num='5'/>
+==========================================================
+((( [Test\Test.vbs] - test_check )))
+>copy  "..\Release\safetee.exe", "..\..\safetee.exe"
+Pass.
+<Section num='6'/>
+==========================================================
+((( [Test\Test.vbs] - test_clean )))
+>devenv.exe "..\safetee.sln" /clean *
+Pass.
+[ManualTest] safetee Test1...bat in "C:\Users\user1\Desktop\safetee\safetee_src\Test\Test.vbs"
+==========================================================
+Test Finish (Pass=5, Manual=1, Skip=0, Fail=0)
+
