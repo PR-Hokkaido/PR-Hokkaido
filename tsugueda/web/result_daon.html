@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>打音判定</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="js/daon.js"></script>
+    <style type="text/css">
+    <!--
+        .box3 {
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    color: #2c2c2f;
+    background: #adff2f;/*背景色*/
+    }
+    .box3 p {
+    margin: 0; 
+    padding: 0;
+    }
+　　example {
+    margin: 10px auto;
+    width:50px;
+    background: orange;
+    }
+    
+    --> 
+    </style>
+    </head>
+    <body>
+　　<center>
+　　<div class="box3">
+      <h1>打音の判定</h1>
+    </div>
+    
+
+    <p>結果表示（イメージ：正常 or 異常）</p>
+    <p>MAPに表示するために、DBに送信された情報を現在地情報情報を保存するようにしたい</p>
+
+    <audio id="player" controls></audio><br><br><br>
+  
+    <button type="button" style="width:50%;padding:10px;font-size:20px;" name="button" 
+    class="classification" id="btn_classification">MAP表示</button><br><br><br>
+
+    <button type="button" style="width:50%;padding:10px;font-size:20px;" name="button" 
+    class="classification" id="btn_classification">打音判定に戻る</button><br><br><br>
+  
+    <div class="panel-footer" style="height:100px;">
+      <div id="result"></div>
+    </div>
+　　</center>
+  </body>
+</html>

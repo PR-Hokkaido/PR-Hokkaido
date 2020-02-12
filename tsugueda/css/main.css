@@ -1,0 +1,15 @@
+.box3 {
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    color: #2c2c2f;
+    background: #adff2f;/*背景色*/
+    }
+    .box3 p {
+    margin: 0; 
+    padding: 0;
+    }
+　　example {
+    margin: 10px auto;
+    width:50px;
+    background: orange;
+    }
