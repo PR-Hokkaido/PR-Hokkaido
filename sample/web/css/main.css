@@ -1,0 +1,194 @@
+@charset "UTF-8";
+
+html {
+    height: 98%;
+}
+
+body {
+    height: 100%;
+    font-family: Meiryo, "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+body.main {
+    background-color: #ffffff;
+    background-image: url(../img/background.JPG);
+    background-position: 45px 450px;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 220px, 220px;
+}
+
+h1 {
+	/*
+	margin-top: 100px;
+	*/
+}
+
+div {
+	border: solid 0px #f00;
+}
+
+.container {
+  max-width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.5);
+}
+
+.judgeBtn {
+    margin-top: 20px;
+    height: 100px;
+    width: 200px;
+}
+
+.modeBtn {
+    height: 40px;
+    width: 170px;
+}
+
+.backBtn {
+    margin-top: 20px;
+    height: 50px;
+    width: 100px;
+}
+
+#dropzone {
+	background-color: #cfc;
+	border: solid 3px #9c9;
+	color: #000;
+	min-height: 50px;
+	padding: 20px;
+	text-shadow: 1px 1px 0 #fff;
+	margin-top: 20px;
+	height: 200px;
+}
+#dropzone.dropover {
+	background-color: #cff;
+	color: #9cc;
+}
+
+#files {
+    width: 370px;
+    height: 300px;
+    overflow: auto;
+    margin-top: 20px;
+}
+
+#files img {
+	border: solid 1px #ccc;
+	cursor: pointer;
+	height: auto;
+	margin: 0 10px;
+	max-height: 300px;
+	max-width: 330px;
+	width: auto;
+}
+
+.result-img img {
+	border: solid 1px #ccc;
+	cursor: pointer;
+	height: auto;
+	margin: 0 10px;
+	max-height: 320px;
+	max-width: 320px;
+	width: auto;
+}
+
+.row {
+    margin-top: 10px;
+}
+
+.result-text {
+    font-size: 1.5rem;
+}
+
+
+.result-text-main {
+    color: #f00;
+    font-size: 2rem;
+}
+
+#loading {
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    text-align: center;
+    padding-top: 270px;
+    background-color: #fff;
+}
+
+.load-on {
+    display: block;
+    opacity: 0.8;
+}
+
+.load-off {
+    display: none;
+}
+
+.load-on-hidden {
+    display: none;
+}
+
+#camera {
+	width: 500px;
+	height: 400px;
+    /* 画像反転 */
+    /*
+    transform: rotateY(180deg);
+    */
+}
+
+#img {
+	width: 500px;
+	height: 375px;
+}
+
+
+/* アコーディオンサンプル */
+#accordion_menu > div {
+    border: #ccc 1px solid;
+    margin-bottom: -1px;
+}
+#accordion_menu a{
+    display: block;
+    /*padding: 10px;*/
+    color: #666;
+    text-decoration: none;
+  position: relative;
+}
+#accordion_menu a:hover{
+    background: #e7e7e7;
+}
+#accordion_menu a::after{
+    content:"";
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-top: #666 1px solid;
+    border-right: #666 1px solid;
+    position: absolute;
+    right: 15px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+#accordion_menu a[aria-expanded=false]::after{
+    -webkit-transform: rotate(135deg);
+    -ms-transform: rotate(135deg);
+    transform: rotate(135deg);
+    transition-duration: 0.3s;
+}
+#accordion_menu a[aria-expanded=true]::after{
+    -webkit-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    transition-duration: 0.3s;
+}
+[id^="menu"] div{
+    padding: 10px 10px 10px 20px;
+}
+
+.result-area {
+    margin-top: 0px;
+}
