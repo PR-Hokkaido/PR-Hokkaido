@@ -141,8 +141,8 @@
         "func": "msg.params = {};\nmsg.params.classifier_ids = \"spectrogram_579117281\";\nmsg.params.threshold = \"0.2\";\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 260,
-        "y": 480,
+        "x": 340,
+        "y": 520,
         "wires": [
             [
                 "f3c03cbd.311c88",
@@ -199,7 +199,7 @@
         "y": 380,
         "wires": [
             [
-                "3665e086.b442e8"
+                "844531f3.8ca18"
             ]
         ]
     },
@@ -211,28 +211,12 @@
         "vr-service-endpoint": "",
         "image-feature": "classifyImage",
         "lang": "ja",
-        "x": 590,
-        "y": 520,
+        "x": 630,
+        "y": 500,
         "wires": [
             [
                 "7cff10f2.4486a",
                 "f97b0bf7.4781e8"
-            ]
-        ]
-    },
-    {
-        "id": "3665e086.b442e8",
-        "type": "function",
-        "z": "d4e293eb.b08db8",
-        "name": "画像データ受け渡し",
-        "func": "\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 1040,
-        "y": 380,
-        "wires": [
-            [
-                "4452e083.a6a3c"
             ]
         ]
     },
@@ -265,5 +249,21 @@
         "x": 420,
         "y": 580,
         "wires": []
+    },
+    {
+        "id": "844531f3.8ca18",
+        "type": "function",
+        "z": "d4e293eb.b08db8",
+        "name": "ダミー",
+        "func": "msg.url = msg.responseUrl;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 870,
+        "y": 380,
+        "wires": [
+            [
+                "4452e083.a6a3c"
+            ]
+        ]
     }
 ]
