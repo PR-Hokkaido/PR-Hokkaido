@@ -1,0 +1,187 @@
+[
+    {
+        "id": "5cef033f.2df5ac",
+        "type": "tab",
+        "label": "フロー 3",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "85d40c06.c48098",
+        "type": "http in",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "url": "/image-recognition",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 80,
+        "wires": [
+            [
+                "96c548ab.77eb98"
+            ]
+        ]
+    },
+    {
+        "id": "96c548ab.77eb98",
+        "type": "template",
+        "z": "5cef033f.2df5ac",
+        "name": "画像認識",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>画像認識</title>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css\">\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js\"></script>\n    <script>\n    window.onload = () => {\n\t  const video  = document.querySelector(\"#video_camera\");\n\t  const canvas = document.querySelector(\"#canvas_picture\");\n\t  const se     = document.querySelector('#audio_se');\n\n\t  /** カメラ設定 */\n\t  const constraints = {\n\t    audio: false,\n\t    video: {\n\t      width: 300,\n\t      height: 200,\n\t      facingMode: \"user\"   // フロントカメラを利用する\n\t      // facingMode: { exact: \"environment\" }  // リアカメラを利用する場合\n\t    }\n\t  };\n\n\t  /**\n\t   * カメラを<video>と同期\n\t   */\n\t  navigator.mediaDevices.getUserMedia(constraints)\n\t  .then( (stream) => {\n\t    video.srcObject = stream;\n\t    video.onloadedmetadata = (e) => {\n\t      video.play();\n\t    };\n\t  })\n\t  .catch( (err) => {\n\t    console.log(err.name + \": \" + err.message);\n\t  });\n\n\t  /**\n\t   * 撮影ボタン\n\t   */\n\t   document.querySelector(\"#btn_recording\").addEventListener(\"click\", () => {\n\t    const ctx = canvas.getContext(\"2d\");\n\n\t    // 演出的な目的で一度映像を止めてSEを再生する\n\t    video.pause();  // 映像を停止\n\t    se.play();      // シャッター音\n\t    setTimeout( () => {\n\t      video.play();    // 0.5秒後にカメラ再開\n\t    }, 500);\n\n\t    // canvasに画像を貼り付ける\n\t    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);\n\t    // DataURLに変換\n\t    var dataURL = canvas.toDataURL(\"image/jpeg\");                 // DataURLに変換\n\t    var base64 = dataURL.replace(/^.*,/, '');                     // プレフィックスを削除してBase64部分だけ取り出し\n\t    form1.url.value = base64;\n\t    console.log(form1.url.value);\n\t  });\n\t};\n    </script>\n    <style type=\"text/css\">\n    <!--\n    .box3 {\n    padding: 0.5em 1em;\n    margin: 2em 0;\n    color: #2c2c2f;\n    background: #cde4ff;/*背景色*/\n    }\n    .box3 p {\n    margin: 0; \n    padding: 0;\n    }\n　　example {\n    margin: 10px auto;\n    width:50px;\n    background: orange;\n    }\n    \n    -->\n    canvas, video{\n    border: 1px solid gray;\n    }\n    </style>\n    </head>\n    <body>\n　　<center>\n　　<div class=\"box3\">\n    <h1>画像認識</h1>\n    </div>\n    \n  　<p>撮影ボタンでカメラ画像を撮影し、判定ボタンで画像認識を開始します</p>\n  　<video id=\"video_camera\" width=\"300\" height=\"200\"></video>\n    <canvas id=\"canvas_picture\" width=\"300\" height=\"200\"></canvas>\n    <form id=\"form1\" action=\"/image-classification\" method=\"post\">\n\t    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"recording\" id=\"btn_recording\">撮影</button><br><br><br>\n\t    <button type=\"submit\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"classification\" id=\"btn_classification\">判定</button><br><br><br>\n\t    <input type=\"hidden\" name=\"url\" value=\"\"/>\n    </form>\n    <form id=\"form2\" action=\"/index\" method=\"get\">\n\t    <button type=\"submit\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"return\" id=\"btn_return\">戻る</button><br><br><br>\n    </form>\n    <audio id=\"audio_se\" preload=\"auto\">\n        <source src=\"camera-shutter1.mp3\" type=\"audio/mp3\">\n    </audio>\n    <div class=\"panel-footer\" style=\"height:100px;\">\n      <div id=\"result\"></div>\n    </div>\n　　</center>\n  </body>\n</html>",
+        "output": "str",
+        "x": 380,
+        "y": 80,
+        "wires": [
+            [
+                "bbd7e072.9763f",
+                "a96516a7.d82f3"
+            ]
+        ]
+    },
+    {
+        "id": "1294c16e.6ccef7",
+        "type": "http in",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "url": "/image-classification",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "221777ed.ea326"
+            ]
+        ]
+    },
+    {
+        "id": "4a02b07e.7b4b68",
+        "type": "template",
+        "z": "5cef033f.2df5ac",
+        "name": "結果",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<title>Visual Recognition</title>\n<h1>Classify Images by Visual Recognition </h1>\n<img src=\"{{result.images.0.image}}\" width=\"320\" />\n<h2>結果</h2>\nこれは\n{{result.images.0.classifiers.0.classes.0.class}}\n（確信度:{{result.images.0.classifiers.0.classes.0.score}}\n)です。\n\n{{#result}}\n  {{#images}}\n    {{#classifiers}}\n  <table border=\"1\">\n      <tr><th>分類名</th><th>確信度</th></tr>\n      {{#classes}}\n      <tr>\n        <td> {{class}} </td> \n        <td> {{score}} </td>\n      </tr>\n      {{/classes}}\n    {{/classifiers}}\n  </table>\n  {{/images}}\n{{/result}}\n<form id=\"form\" action=\"/image-recognition\" method=\"get\">\n  <button type=\"submit\" id=\"return\">戻る</button>\n</form>",
+        "output": "str",
+        "x": 610,
+        "y": 500,
+        "wires": [
+            [
+                "1112ba87.6910ed"
+            ]
+        ]
+    },
+    {
+        "id": "32526740.9bfc48",
+        "type": "debug",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 410,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "170f2e7e.dd4d2a",
+        "type": "visual-recognition-v3",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "vr-service-endpoint": "",
+        "image-feature": "classifyImage",
+        "lang": "ja",
+        "x": 590,
+        "y": 280,
+        "wires": [
+            [
+                "4a02b07e.7b4b68",
+                "32526740.9bfc48"
+            ]
+        ]
+    },
+    {
+        "id": "1112ba87.6910ed",
+        "type": "http response",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 850,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "bbd7e072.9763f",
+        "type": "http response",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 610,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "a96516a7.d82f3",
+        "type": "debug",
+        "z": "5cef033f.2df5ac",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 640,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "221777ed.ea326",
+        "type": "function",
+        "z": "5cef033f.2df5ac",
+        "name": "base64decode",
+        "func": "msg.payload = new Buffer(msg.payload.url, 'base64');\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 280,
+        "wires": [
+            [
+                "170f2e7e.dd4d2a"
+            ]
+        ]
+    },
+    {
+        "id": "cd81a89c.a32a18",
+        "type": "comment",
+        "z": "5cef033f.2df5ac",
+        "name": "画像認識　カメラを認識して画像取得します。",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "78b0cd8a.d3ef94",
+        "type": "comment",
+        "z": "5cef033f.2df5ac",
+        "name": "画像をバイナリ変換してからWatsonで判定します。",
+        "info": "",
+        "x": 210,
+        "y": 200,
+        "wires": []
+    }
+]
