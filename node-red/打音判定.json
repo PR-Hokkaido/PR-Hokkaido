@@ -1,15 +1,15 @@
 [
     {
-        "id": "d00e4229.3ceef",
+        "id": "d4e293eb.b08db8",
         "type": "tab",
         "label": "フロー 2",
         "disabled": false,
         "info": ""
     },
     {
-        "id": "c087d624.1b88",
+        "id": "b9cdb25a.c1c7c8",
         "type": "comment",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "打音の集音　UI提供部分　ここは別枠でWEBアプリとして外出ししても良いかと思います。",
         "info": "",
         "x": 360,
@@ -17,9 +17,9 @@
         "wires": []
     },
     {
-        "id": "65644b3a.47564c",
+        "id": "6dcd6b41.2710dc",
         "type": "http in",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "/pr-hokkaido-classification",
         "url": "/pr-hokkiado-classification",
         "method": "get",
@@ -29,34 +29,34 @@
         "y": 120,
         "wires": [
             [
-                "88e2785b.c5e3d"
+                "964250d5.9fb38"
             ]
         ]
     },
     {
-        "id": "88e2785b.c5e3d",
+        "id": "964250d5.9fb38",
         "type": "template",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "打音収集",
         "field": "payload",
         "fieldType": "msg",
         "format": "html",
         "syntax": "plain",
-        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>打音判定</title>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css\">\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js\"></script>\n    <script>\n    $(function() {\n  $('#btn_start_recording').on('click', function(){\n    startRecording();\n  })\n\n  $('#btn_stop_recording').on('click', function(){\n    endRecording();\n  })\n  \n  $('#btn_classification').on('click', function(){\n    classification();\n  })\n  \n})\n // ///////////////////////////////////////////\n // 録音関係\n // ///////////////////////////////////////////\n\n // 変数定義\n let localMediaStream = null;\n let localScriptProcessor = null;\n let audioSampleRate = null;\n let audioContext = null;\n let bufferSize = 1024;\n let audioData = []; // 録音データ\n let recordingFlg = false;\n let dl = null;\n\n // 録音バッファ作成（録音中自動で繰り返し呼び出される）\n function onAudioProcess(e) {\n     if (!recordingFlg) return;\n     console.log('onAudioProcess');\n\n     // 音声のバッファを作成\n     let input = e.inputBuffer.getChannelData(0);\n     let bufferData = new Float32Array(bufferSize);\n     for (let i = 0; i < bufferSize; i++) {\n         bufferData[i] = input[i];\n     }\n     audioData.push(bufferData);\n }\n\n // 解析開始\n function startRecording(evt_stream) {\n     // 画面アクセス時にマイクを取得\n     console.log('startRecording');\n     recordingFlg = true;\n\n     // 取得されている音声ストリームの録音を開始\n     localMediaStream = evt_stream;\n\n     if (!navigator || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {\n       alert('Missing support for navigator.mediaDevices.getUserMedia') // temp: helps when testing for strange issues on ios/safari\n       return\n     }\n\n     audioContext = new (window.AudioContext || window.webkitAudioContext)();\n     // サンプルレートを保持しておく\n     audioSampleRate = audioContext.sampleRate;\n\n     let scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);\n     localScriptProcessor = scriptProcessor;\n\n     if (audioContext.createMediaStreamDestination) {\n       destinationNode = audioContext.createMediaStreamDestination()\n     }\n     else {\n       destinationNode = audioContext.destination\n     }\n\n     // safariで Web Audio APIを動かすため、先にaudioContextを生成し、UserMediaを生成する\n     return navigator.mediaDevices.getUserMedia({audio: true})\n       .then((stream) => {\n         this._startRecordingWithStream(stream, destinationNode, scriptProcessor)\n       })\n       .catch((error) => {\n         alert('Error with getUserMedia: ' + error.message) // temp: helps when testing for strange issues on ios/safari\n         console.log(error)\n       })\n   }\n\n   function _startRecordingWithStream(stream, destinationNode, scriptProcessor) {\n     // ループ処理のセット\n     let mediastreamsource = audioContext.createMediaStreamSource(stream);\n     mediastreamsource.connect(scriptProcessor);\n     scriptProcessor.onaudioprocess = onAudioProcess;\n     console.log('startRecording scriptProcessor.connect(audioContext.destination)');\n     scriptProcessor.connect(destinationNode);\n   }\n\n // 解析終了\n function endRecording() {\n     console.log('endRecording');\n     recordingFlg = false;\n     // console.log('audioData');\n     // console.log(audioData);\n\n     // console.log('blob = exportWAV(audioData)');\n     // 録音できたので録音データをwavにしてinputに配置＆再生ボタンに登録\n     let blob = exportWAV(audioData);\n     // データ送信用のinputタグを取得\n     let wave_tag = document.getElementById('demo_speaking_wave_file');\n\n     // base64加工\n     let reader = new FileReader();\n     reader.readAsDataURL(blob);\n     reader.onloadend = function() {\n         base64data = reader.result;\n         // console.log('base64data');\n         // console.log(base64data);\n        //wave_tag.value = base64data;\n     };\n\n     let myURL = window.URL || window.webkitURL;\n     let url = myURL.createObjectURL(blob);\n     //dl = document.querySelector(\"#dl\");\n     \n     dl = \"test\";\n     //集音したものから音声データを作成する\n     //dl.href = myURL.createObjectURL(blob);\n     \n     //var min = 0 ;\n　　 //var max = 9 ;\n\n     //var a = Math.floor( Math.random() * (max + 1 - min) ) + min ;\n     //var b = Math.floor( Math.random() * (max + 1 - min) ) + min ;\n     //dl.download = new Date().getTime().toString(16) + '-' + a + b + '.wav';\n     // console.log('wavefile');\n     // console.log(url);\n\n     // audioタグに録音データをセット\n     let player = document.getElementById('player');\n     player.src =  url;\n     player.load();\n\n     // audioDataをクリア\n     localMediaStream = null;\n     localScriptProcessor = null;\n     audioContext.close()\n     audioContext = null;\n     audioData = []; // 録音データ\n }\n\n // ///////////////////////////////////////////\n // waveファイル作成処理\n // ///////////////////////////////////////////\n\n function exportWAV(audioData) {\n\n     let encodeWAV = function(samples, sampleRate) {\n         let buffer = new ArrayBuffer(44 + samples.length * 2);\n         let view = new DataView(buffer);\n\n         let writeString = function(view, offset, string) {\n             for (let i = 0; i < string.length; i++){\n                 view.setUint8(offset + i, string.charCodeAt(i));\n             }\n         };\n\n         let floatTo16BitPCM = function(output, offset, input) {\n             for (let i = 0; i < input.length; i++, offset += 2){\n                 let s = Math.max(-1, Math.min(1, input[i]));\n                 output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);\n             }\n         };\n\n         writeString(view, 0, 'RIFF');  // RIFFヘッダ\n         view.setUint32(4, 32 + samples.length * 2, true); // これ以降のファイルサイズ\n         writeString(view, 8, 'WAVE'); // WAVEヘッダ\n         writeString(view, 12, 'fmt '); // fmtチャンク\n         view.setUint32(16, 16, true); // fmtチャンクのバイト数\n         view.setUint16(20, 1, true); // フォーマットID\n         view.setUint16(22, 1, true); // チャンネル数\n         view.setUint32(24, sampleRate, true); // サンプリングレート\n         view.setUint32(28, sampleRate * 2, true); // データ速度\n         view.setUint16(32, 2, true); // ブロックサイズ\n         view.setUint16(34, 16, true); // サンプルあたりのビット数\n         writeString(view, 36, 'data'); // dataチャンク\n         view.setUint32(40, samples.length * 2, true); // 波形データのバイト数\n         floatTo16BitPCM(view, 44, samples); // 波形データ\n\n         return view;\n     };\n\n     let mergeBuffers = function(audioData) {\n         let sampleLength = 0;\n         for (let i = 0; i < audioData.length; i++) {\n             sampleLength += audioData[i].length;\n         }\n         let samples = new Float32Array(sampleLength);\n         let sampleIdx = 0;\n         for (let i = 0; i < audioData.length; i++) {\n             for (let j = 0; j < audioData[i].length; j++) {\n                 samples[sampleIdx] = audioData[i][j];\n                 sampleIdx++;\n             }\n         }\n         return samples;\n     };\n\n     let dataview = encodeWAV(mergeBuffers(audioData), audioSampleRate);\n     let audioBlob = new Blob([dataview], { type: 'audio/wav' });\n\n     return audioBlob;\n\n     // let myURL = window.URL || window.webkitURL;\n     // let url = myURL.createObjectURL(audioBlob);\n     // return url;\n }\n\n function audioPlay() {\n     let play_button = document.getElementById(\"btn_play_pause\");\n     play_button.onclick = new Function(\"audioPause();\");\n     play_button.innerText = \"停止\";\n     document.getElementById(\"player\").play();\n }\n\n function audioPause() {\n     let play_button = document.getElementById(\"btn_play_pause\");\n     play_button.onclick = new Function(\"audioPlay();\");\n     play_button.innerText = \"再生\";\n     document.getElementById(\"player\").pause();\n }\n    \n  function classification() {\n      \n      if (dl === null || dl === undefined) {\n         document.getElementById(\"result\").innerText = \"打音が録音されてません\" ;  \n      } else {　\n          // POSTでアップロード\n      $.ajax({\n          url  : \"./classification\",\n          type : \"POST\",\n          data : blob,\n          cache       : false,\n          contentType : false,\n          processData : false,\n          dataType    : \"html\"\n      })\n      .done(function(data, textStatus, jqXHR) {\n        var result_element = document.getElementById('result');\n\n        var objResult = JSON.parse(data);\n        console.log(objResult);\n\n        // 子ノードを全削除\n        if (result_element.hasChildNodes()){\n          for (var i=result_element.childNodes.length-1; i>=0; i--) {\n            result_element.removeChild(result_element.childNodes[i]);\n          }\n        }\n\n        // classifierId+name\n        var classifier;\n        classifier = document.createTextNode(\"classifierId=\"+objResult.images[0].classifiers[0].classifier_id+\", classifierName=\"+objResult.images[0].classifiers[0].name);\n        var classifierBox = document.createElement('p');\n        classifierBox.appendChild(classifier);\n        result_element.appendChild(classifierBox);\n\n        // classes\n        var classes;\n        classes = document.createTextNode(\"className=\"+objResult.images[0].classifiers[0].classes[0].class +\", score=\"+objResult.images[0].classifiers[0].classes[0].score +\", className=\"+objResult.images[0].classifiers[0].classes[1].class +\", score=\"+objResult.images[0].classifiers[0].classes[1].score );\n        var classesBox = document.createElement('p');\n        classesBox.appendChild(classes);\n        result_element.appendChild(classesBox);\n      })\n      .fail(function(jqXHR, textStatus, errorThrown) {\n          // エラー\n          var error;\n          error = document.createTextNode(\"error=\"+data);\n          var errorBox = document.createElement('p');\n          errorBox.appendChild(error);\n          result_element.appendChild(errorBox);\n          return;\n      })\n      .always(function(data) {\n        // do nothing\n      });\n    }\n  }\n    </script>\n    <style type=\"text/css\">\n    <!--\n    .box3 {\n    padding: 0.5em 1em;\n    margin: 2em 0;\n    color: #2c2c2f;\n    background: #cde4ff;/*背景色*/\n    }\n    .box3 p {\n    margin: 0; \n    padding: 0;\n    }\n　　example {\n    margin: 10px auto;\n    width:50px;\n    background: orange;\n    }\n    \n    --> \n    </style>\n    </head>\n    <body>\n　　<center>\n　　<div class=\"box3\">\n    <h1>打音の判定</h1>\n    </div>\n    \n  　<p>レコード開始実行と同時に録音がはじまり、レコード停止後に音声データを生成します</p>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"start_recording\" id=\"btn_start_recording\">レコード開始</button><br><br><br>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"stop_recording\" id=\"btn_stop_recording\">ストップ</button><br><br><br>\n    <audio id=\"player\" controls></audio><br><br><br>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"classification\" id=\"btn_classification\">判定</button><br><br><br>\n    <div class=\"panel-footer\" style=\"height:100px;\">\n      <div id=\"result\"></div>\n    </div>\n　　</center>\n  </body>\n</html>",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>打音判定</title>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css\">\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js\"></script>\n    <script>\n    $(function() {\n  $('#btn_start_recording').on('click', function(){\n    startRecording();\n  })\n\n  $('#btn_stop_recording').on('click', function(){\n    endRecording();\n  })\n  \n  $('#btn_classification').on('click', function(){\n    classification();\n  })\n  \n})\n // ///////////////////////////////////////////\n // 録音関係\n // ///////////////////////////////////////////\n\n // 変数定義\n let localMediaStream = null;\n let localScriptProcessor = null;\n let audioSampleRate = null;\n let audioContext = null;\n let bufferSize = 1024;\n let audioData = []; // 録音データ\n let recordingFlg = false;\n let dl = null;\n let blob = null;　\n  \n // 録音バッファ作成（録音中自動で繰り返し呼び出される）\n function onAudioProcess(e) {\n     if (!recordingFlg) return;\n     console.log('onAudioProcess');\n\n     // 音声のバッファを作成\n     let input = e.inputBuffer.getChannelData(0);\n     let bufferData = new Float32Array(bufferSize);\n     for (let i = 0; i < bufferSize; i++) {\n         bufferData[i] = input[i];\n     }\n     audioData.push(bufferData);\n }\n\n // 解析開始\n function startRecording(evt_stream) {\n     // 画面アクセス時にマイクを取得\n     console.log('startRecording');\n     recordingFlg = true;\n\n     // 取得されている音声ストリームの録音を開始\n     localMediaStream = evt_stream;\n\n     if (!navigator || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {\n       alert('Missing support for navigator.mediaDevices.getUserMedia') // temp: helps when testing for strange issues on ios/safari\n       return\n     }\n\n     audioContext = new (window.AudioContext || window.webkitAudioContext)();\n     // サンプルレートを保持しておく\n     audioSampleRate = audioContext.sampleRate;\n\n     let scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);\n     localScriptProcessor = scriptProcessor;\n\n     if (audioContext.createMediaStreamDestination) {\n       destinationNode = audioContext.createMediaStreamDestination()\n     }\n     else {\n       destinationNode = audioContext.destination\n     }\n\n     // safariで Web Audio APIを動かすため、先にaudioContextを生成し、UserMediaを生成する\n     return navigator.mediaDevices.getUserMedia({audio: true})\n       .then((stream) => {\n         this._startRecordingWithStream(stream, destinationNode, scriptProcessor)\n       })\n       .catch((error) => {\n         alert('Error with getUserMedia: ' + error.message) // temp: helps when testing for strange issues on ios/safari\n         console.log(error)\n       })\n   }\n\n   function _startRecordingWithStream(stream, destinationNode, scriptProcessor) {\n     // ループ処理のセット\n     let mediastreamsource = audioContext.createMediaStreamSource(stream);\n     mediastreamsource.connect(scriptProcessor);\n     scriptProcessor.onaudioprocess = onAudioProcess;\n     console.log('startRecording scriptProcessor.connect(audioContext.destination)');\n     scriptProcessor.connect(destinationNode);\n   }\n\n // 解析終了\n function endRecording() {\n     console.log('endRecording');\n     recordingFlg = false;\n     // console.log('audioData');\n     // console.log(audioData);\n\n     // console.log('blob = exportWAV(audioData)');\n     // 録音できたので録音データをwavにしてinputに配置＆再生ボタンに登録\n     blob = exportWAV(audioData);\n     // データ送信用のinputタグを取得\n     let wave_tag = document.getElementById('demo_speaking_wave_file');\n\n     // base64加工\n     let reader = new FileReader();\n     reader.readAsDataURL(blob);\n     reader.onloadend = function() {\n         base64data = reader.result;\n         // console.log('base64data');\n         // console.log(base64data);\n        //wave_tag.value = base64data;\n     };\n\n     let myURL = window.URL || window.webkitURL;\n     let url = myURL.createObjectURL(blob);\n     //dl = document.querySelector(\"#dl\");\n     \n     dl = \"test\";\n     //集音したものから音声データを作成する\n     //dl.href = myURL.createObjectURL(blob);\n     \n     //var min = 0 ;\n　　 //var max = 9 ;\n\n     //var a = Math.floor( Math.random() * (max + 1 - min) ) + min ;\n     //var b = Math.floor( Math.random() * (max + 1 - min) ) + min ;\n     //dl.download = new Date().getTime().toString(16) + '-' + a + b + '.wav';\n     // console.log('wavefile');\n     // console.log(url);\n\n     // audioタグに録音データをセット\n     let player = document.getElementById('player');\n     player.src =  url;\n     player.load();\n\n     // audioDataをクリア\n     localMediaStream = null;\n     localScriptProcessor = null;\n     audioContext.close()\n     audioContext = null;\n     audioData = []; // 録音データ\n }\n\n // ///////////////////////////////////////////\n // waveファイル作成処理\n // ///////////////////////////////////////////\n\n function exportWAV(audioData) {\n\n     let encodeWAV = function(samples, sampleRate) {\n         let buffer = new ArrayBuffer(44 + samples.length * 2);\n         let view = new DataView(buffer);\n\n         let writeString = function(view, offset, string) {\n             for (let i = 0; i < string.length; i++){\n                 view.setUint8(offset + i, string.charCodeAt(i));\n             }\n         };\n\n         let floatTo16BitPCM = function(output, offset, input) {\n             for (let i = 0; i < input.length; i++, offset += 2){\n                 let s = Math.max(-1, Math.min(1, input[i]));\n                 output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);\n             }\n         };\n\n         writeString(view, 0, 'RIFF');  // RIFFヘッダ\n         view.setUint32(4, 32 + samples.length * 2, true); // これ以降のファイルサイズ\n         writeString(view, 8, 'WAVE'); // WAVEヘッダ\n         writeString(view, 12, 'fmt '); // fmtチャンク\n         view.setUint32(16, 16, true); // fmtチャンクのバイト数\n         view.setUint16(20, 1, true); // フォーマットID\n         view.setUint16(22, 1, true); // チャンネル数\n         view.setUint32(24, sampleRate, true); // サンプリングレート\n         view.setUint32(28, sampleRate * 2, true); // データ速度\n         view.setUint16(32, 2, true); // ブロックサイズ\n         view.setUint16(34, 16, true); // サンプルあたりのビット数\n         writeString(view, 36, 'data'); // dataチャンク\n         view.setUint32(40, samples.length * 2, true); // 波形データのバイト数\n         floatTo16BitPCM(view, 44, samples); // 波形データ\n\n         return view;\n     };\n\n     let mergeBuffers = function(audioData) {\n         let sampleLength = 0;\n         for (let i = 0; i < audioData.length; i++) {\n             sampleLength += audioData[i].length;\n         }\n         let samples = new Float32Array(sampleLength);\n         let sampleIdx = 0;\n         for (let i = 0; i < audioData.length; i++) {\n             for (let j = 0; j < audioData[i].length; j++) {\n                 samples[sampleIdx] = audioData[i][j];\n                 sampleIdx++;\n             }\n         }\n         return samples;\n     };\n\n     let dataview = encodeWAV(mergeBuffers(audioData), audioSampleRate);\n     let audioBlob = new Blob([dataview], { type: 'audio/wav' });\n\n     return audioBlob;\n\n     // let myURL = window.URL || window.webkitURL;\n     // let url = myURL.createObjectURL(audioBlob);\n     // return url;\n }\n\n function audioPlay() {\n     let play_button = document.getElementById(\"btn_play_pause\");\n     play_button.onclick = new Function(\"audioPause();\");\n     play_button.innerText = \"停止\";\n     document.getElementById(\"player\").play();\n }\n\n function audioPause() {\n     let play_button = document.getElementById(\"btn_play_pause\");\n     play_button.onclick = new Function(\"audioPlay();\");\n     play_button.innerText = \"再生\";\n     document.getElementById(\"player\").pause();\n }\n    \n  function classification() {\n      \n      if (blob === null || blob === undefined) {\n         document.getElementById(\"result\").innerText = \"打音が録音されてません\" ;  \n      } else {　\n          // POSTでアップロード\n      var fd = new FormData();\n      fd.append('fname', 'test.wav');\n      fd.append(\"data\", blob);\n     \n      console.log('done!');\n      $.ajax({\n          url  : \"./classification\",\n          type : \"POST\",\n          data : fd,\n          cache       : false,\n          contentType : false,\n          processData : false,\n          dataType    : \"html\"\n      })\n      .done(function(data, textStatus, jqXHR) {\n        var result_element = document.getElementById('result');\n\n        var objResult = JSON.parse(data);\n        console.log(objResult);\n\n        // 子ノードを全削除\n        if (result_element.hasChildNodes()){\n          for (var i=result_element.childNodes.length-1; i>=0; i--) {\n            result_element.removeChild(result_element.childNodes[i]);\n          }\n        }\n\n        // classifierId+name\n        var classifier;\n        classifier = document.createTextNode(\"classifierId=\"+objResult.images[0].classifiers[0].classifier_id+\", classifierName=\"+objResult.images[0].classifiers[0].name);\n        var classifierBox = document.createElement('p');\n        classifierBox.appendChild(classifier);\n        result_element.appendChild(classifierBox);\n\n        // classes\n        var classes;\n        classes = document.createTextNode(\"className=\"+objResult.images[0].classifiers[0].classes[0].class +\", score=\"+objResult.images[0].classifiers[0].classes[0].score +\", className=\"+objResult.images[0].classifiers[0].classes[1].class +\", score=\"+objResult.images[0].classifiers[0].classes[1].score );\n        var classesBox = document.createElement('p');\n        classesBox.appendChild(classes);\n        result_element.appendChild(classesBox);\n      })\n      .fail(function(jqXHR, textStatus, errorThrown) {\n          // エラー\n          console.log('error!');\n          var result_element = document.getElementById('result');\n          var error;\n          error = document.createTextNode(\"error=\"+errorThrown);\n          var errorBox = document.createElement('p');\n          errorBox.appendChild(error);\n          result_element.appendChild(errorBox);\n          return;\n      })\n      .always(function(data2) {\n        // do nothing\n      });\n        }    \n  }\n    </script>\n    <style type=\"text/css\">\n    <!--\n    .box3 {\n    padding: 0.5em 1em;\n    margin: 2em 0;\n    color: #2c2c2f;\n    background: #cde4ff;/*背景色*/\n    }\n    .box3 p {\n    margin: 0; \n    padding: 0;\n    }\n　　example {\n    margin: 10px auto;\n    width:50px;\n    background: orange;\n    }\n    \n    --> \n    </style>\n    </head>\n    <body>\n　　<center>\n　　<div class=\"box3\">\n    <h1>打音の判定</h1>\n    </div>\n    \n  　<p>レコード開始実行と同時に録音がはじまり、レコード停止後に音声データを生成します</p>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"start_recording\" id=\"btn_start_recording\">レコード開始</button><br><br><br>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"stop_recording\" id=\"btn_stop_recording\">ストップ</button><br><br><br>\n    <audio id=\"player\" controls></audio><br><br><br>\n    <button type=\"button\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\" class=\"classification\" id=\"btn_classification\">判定</button><br><br><br>\n    <div class=\"panel-footer\" style=\"height:100px;\">\n      <div id=\"result\"></div>\n    </div>\n　　</center>\n  </body>\n</html>",
         "output": "str",
         "x": 380,
         "y": 120,
         "wires": [
             [
-                "e09b9468.47c52",
-                "e8e6cb37.4951d8"
+                "a284a1ab.8d924",
+                "6160800a.60d3e"
             ]
         ]
     },
     {
-        "id": "e09b9468.47c52",
+        "id": "a284a1ab.8d924",
         "type": "http response",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "http response",
         "statusCode": "",
         "headers": {},
@@ -65,24 +65,24 @@
         "wires": []
     },
     {
-        "id": "e8e6cb37.4951d8",
+        "id": "6160800a.60d3e",
         "type": "debug",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "",
         "active": true,
         "tosidebar": true,
         "console": true,
         "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "x": 580,
+        "complete": "true",
+        "targetType": "full",
+        "x": 550,
         "y": 220,
         "wires": []
     },
     {
-        "id": "8aeabc9b.344308",
+        "id": "f722a0de.4a2c98",
         "type": "comment",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "打音データの可視化とWatsonによる判別",
         "info": "",
         "x": 200,
@@ -90,9 +90,9 @@
         "wires": []
     },
     {
-        "id": "4c690f85.b94228",
+        "id": "abcbda5e.6d94a",
         "type": "http in",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "/classification",
         "url": "/classification",
         "method": "post",
@@ -102,14 +102,14 @@
         "y": 380,
         "wires": [
             [
-                "e58b60b7.8e6528"
+                "cebce4b5.b0a718"
             ]
         ]
     },
     {
-        "id": "e58b60b7.8e6528",
+        "id": "cebce4b5.b0a718",
         "type": "function",
-        "z": "d00e4229.3ceef",
+        "z": "d4e293eb.b08db8",
         "name": "打音データ受け渡し",
         "func": "var buf = msg.req.files[0].buffer;\nmsg.file = buf;\nmsg.payload = msg.file;\nreturn msg;",
         "outputs": 1,
@@ -118,73 +118,152 @@
         "y": 380,
         "wires": [
             [
-                "615854b4.a4fe54",
-                "5f64199b.a3bc8"
+                "f05db4ca.5b3078"
             ]
         ]
     },
     {
-        "id": "615854b4.a4fe54",
-        "type": "debug",
-        "z": "d00e4229.3ceef",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "x": 770,
-        "y": 300,
+        "id": "52d5aec8.392db",
+        "type": "http response",
+        "z": "d4e293eb.b08db8",
+        "name": "結果を返却",
+        "statusCode": "",
+        "headers": {},
+        "x": 1050,
+        "y": 740,
         "wires": []
     },
     {
-        "id": "9ebfc824.2abbd",
-        "type": "debug",
-        "z": "d00e4229.3ceef",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "x": 1100,
-        "y": 360,
-        "wires": []
-    },
-    {
-        "id": "5f64199b.a3bc8",
-        "type": "cos-put",
-        "z": "d00e4229.3ceef",
-        "name": "打音データの格納",
-        "bucket": "hokkaidouken3-donotdelete-pr-l6yokxocpilrbi",
-        "create": "1",
-        "objectname": "test.wav",
-        "mode": "1",
-        "filepath": "",
-        "filename": "",
-        "contentType": "audio/x-wav",
-        "geturl": false,
-        "cosconfig": "78b1768b.b91388",
-        "x": 730,
-        "y": 400,
+        "id": "4452e083.a6a3c",
+        "type": "function",
+        "z": "d4e293eb.b08db8",
+        "name": "カスタム分類器設定",
+        "func": "msg.params = {};\nmsg.params.classifier_ids = \"spectrogram_579117281\";\nmsg.params.threshold = \"0.2\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 520,
         "wires": [
             [
-                "9ebfc824.2abbd"
+                "f3c03cbd.311c88",
+                "9a1f6edf.fb4de"
             ]
         ]
     },
     {
-        "id": "78b1768b.b91388",
-        "type": "cos-config",
-        "z": "",
-        "apiKeyId": "6X8xvjgaHbFrFClPw-gvL6TVBe7QrU92n6TQT7Pxi951",
-        "location": "us-south",
-        "ibmAuthEndpoint": "https://iam.ng.bluemix.net/oidc/token",
-        "endpoint": "s3.us-south.objectstorage.softlayer.net",
-        "serviceInstanceId": "crn:v1:bluemix:public:iam-identity::a/ac1579297bddcf2270e4247be52c7b4e::serviceid:ServiceId-bf62c3f4-292b-4d87-bb47-1084ea83dda2",
-        "hmac": false,
-        "accesskeyid": "",
-        "accesskey": "",
-        "name": "Cloud Object Storage-2f"
+        "id": "7cff10f2.4486a",
+        "type": "function",
+        "z": "d4e293eb.b08db8",
+        "name": "parse",
+        "func": "msg.payload = msg.result;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 770,
+        "y": 600,
+        "wires": [
+            [
+                "53f53ac2.eefa74"
+            ]
+        ]
+    },
+    {
+        "id": "53f53ac2.eefa74",
+        "type": "json",
+        "z": "d4e293eb.b08db8",
+        "name": "",
+        "property": "payload",
+        "action": "str",
+        "pretty": true,
+        "x": 830,
+        "y": 700,
+        "wires": [
+            [
+                "52d5aec8.392db"
+            ]
+        ]
+    },
+    {
+        "id": "f05db4ca.5b3078",
+        "type": "http request",
+        "z": "d4e293eb.b08db8",
+        "name": "pythonの外部サービスに処理を渡す",
+        "method": "POST",
+        "ret": "bin",
+        "paytoqs": false,
+        "url": "http://184.172.247.52:30872/spectrogram",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 630,
+        "y": 380,
+        "wires": [
+            [
+                "844531f3.8ca18"
+            ]
+        ]
+    },
+    {
+        "id": "f3c03cbd.311c88",
+        "type": "visual-recognition-v3",
+        "z": "d4e293eb.b08db8",
+        "name": "",
+        "vr-service-endpoint": "",
+        "image-feature": "classifyImage",
+        "lang": "ja",
+        "x": 630,
+        "y": 500,
+        "wires": [
+            [
+                "7cff10f2.4486a",
+                "f97b0bf7.4781e8"
+            ]
+        ]
+    },
+    {
+        "id": "f97b0bf7.4781e8",
+        "type": "debug",
+        "z": "d4e293eb.b08db8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 890,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "9a1f6edf.fb4de",
+        "type": "debug",
+        "z": "d4e293eb.b08db8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 420,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "844531f3.8ca18",
+        "type": "function",
+        "z": "d4e293eb.b08db8",
+        "name": "ダミー",
+        "func": "msg.url = msg.responseUrl;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 870,
+        "y": 380,
+        "wires": [
+            [
+                "4452e083.a6a3c"
+            ]
+        ]
     }
 ]
