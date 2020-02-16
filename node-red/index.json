@@ -1,0 +1,82 @@
+[
+    {
+        "id": "2dbd133.e19ac6c",
+        "type": "tab",
+        "label": "フロー 15",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a0f3a5b7.48ce18",
+        "type": "comment",
+        "z": "2dbd133.e19ac6c",
+        "name": "index画面　画像認識、打音判定画面に遷移します。",
+        "info": "",
+        "x": 210,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "8af97ee7.0d102",
+        "type": "http in",
+        "z": "2dbd133.e19ac6c",
+        "name": "",
+        "url": "/index",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 80,
+        "y": 80,
+        "wires": [
+            [
+                "f614db55.933d88"
+            ]
+        ]
+    },
+    {
+        "id": "f614db55.933d88",
+        "type": "template",
+        "z": "2dbd133.e19ac6c",
+        "name": "インデックス",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>ＰＲ北海道</title>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css\">\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js\"></script>\n    <style type=\"text/css\">\n    <!--\n    .box3 {\n    padding: 0.5em 1em;\n    margin: 2em 0;\n    color: #2c2c2f;\n    background: #cde4ff;/*背景色*/\n    }\n    .box3 p {\n    margin: 0; \n    padding: 0;\n    }\n　　example {\n    margin: 10px auto;\n    width:50px;\n    background: orange;\n    }\n    \n    -->\n    </style>\n    </head>\n    <body>\n　　<center>\n　　<div class=\"box3\">\n    <h1>ＰＲ北海道</h1>\n    </div>\n    <form id=\"form1\" action=\"/image-recognition\" method=\"get\">\n\t    <button type=\"submit\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\">画像認識</button><br><br><br>\n    </form>\n    <form id=\"form2\" action=\"/pr-hokkiado-classification\" method=\"get\">\n        <button type=\"submit\" style=\"width:50%;padding:10px;font-size:30px;\" name=\"button\">打音判定</button><br><br><br>\n    </form>\n　　</center>\n  </body>\n</html>",
+        "output": "str",
+        "x": 400,
+        "y": 80,
+        "wires": [
+            [
+                "fbcec378.38f8d",
+                "4d3300f0.3870e"
+            ]
+        ]
+    },
+    {
+        "id": "fbcec378.38f8d",
+        "type": "http response",
+        "z": "2dbd133.e19ac6c",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 610,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "4d3300f0.3870e",
+        "type": "debug",
+        "z": "2dbd133.e19ac6c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 640,
+        "y": 140,
+        "wires": []
+    }
+]
