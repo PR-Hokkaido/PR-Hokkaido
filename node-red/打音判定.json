@@ -113,7 +113,7 @@
         "name": "結果を返却",
         "statusCode": "",
         "headers": {},
-        "x": 1070,
+        "x": 1130,
         "y": 380,
         "wires": []
     },
@@ -150,7 +150,38 @@
         "y": 380,
         "wires": [
             [
-                "44f5954e.c773c4"
+                "44f5954e.c773c4",
+                "cb9fe517.21588"
+            ]
+        ]
+    },
+    {
+        "id": "e58aa43c.f5e2e",
+        "type": "cloudant out",
+        "z": "e320d232.b4d08",
+        "name": "DBにデータ格納",
+        "cloudant": "",
+        "database": "result",
+        "service": "hokkaidouken-cloudantNoSQLDB",
+        "payonly": true,
+        "operation": "insert",
+        "x": 1000,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "cb9fe517.21588",
+        "type": "function",
+        "z": "e320d232.b4d08",
+        "name": "DB格納用の情報",
+        "func": "var class_value=msg.payload.images[0].classifiers[0].classes[0].class;\nvar score_value=msg.payload.images[0].classifiers[0].classes[0].score;\nvar longtitude='';\nvar latitude='';\nvar date = new Date();\ndate.setHours(date.getHours() + 9);\nresult = {\n    \"date\": date.toString(),\n    \"latitude\": latitude,\n    \"longtitude\": longtitude,\n    \"class\": class_value,\n    \"score\": score_value\n}\nmsg.payload = result;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 800,
+        "y": 500,
+        "wires": [
+            [
+                "e58aa43c.f5e2e"
             ]
         ]
     }
