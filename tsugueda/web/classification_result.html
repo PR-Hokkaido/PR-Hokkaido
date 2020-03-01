@@ -103,10 +103,7 @@
  function endRecording() {
      console.log('endRecording');
      recordingFlg = false;
-     // console.log('audioData');
-     // console.log(audioData);
 
-     // console.log('blob = exportWAV(audioData)');
      // 録音できたので録音データをwavにしてinputに配置＆再生ボタンに登録
      blob = exportWAV(audioData);
      // データ送信用のinputタグを取得
@@ -117,27 +114,12 @@
      reader.readAsDataURL(blob);
      reader.onloadend = function() {
          base64data = reader.result;
-         // console.log('base64data');
-         // console.log(base64data);
-        //wave_tag.value = base64data;
      };
 
      let myURL = window.URL || window.webkitURL;
      let url = myURL.createObjectURL(blob);
-     //dl = document.querySelector("#dl");
      
      dl = "test";
-     //集音したものから音声データを作成する
-     //dl.href = myURL.createObjectURL(blob);
-     
-     //var min = 0 ;
-　　 //var max = 9 ;
-
-     //var a = Math.floor( Math.random() * (max + 1 - min) ) + min ;
-     //var b = Math.floor( Math.random() * (max + 1 - min) ) + min ;
-     //dl.download = new Date().getTime().toString(16) + '-' + a + b + '.wav';
-     // console.log('wavefile');
-     // console.log(url);
 
      // audioタグに録音データをセット
      let player = document.getElementById('player');
@@ -214,9 +196,6 @@
 
      return audioBlob;
 
-     // let myURL = window.URL || window.webkitURL;
-     // let url = myURL.createObjectURL(audioBlob);
-     // return url;
  }
 
  function audioPlay() {
@@ -303,10 +282,6 @@
         classesBox.appendChild(classes);
         result_element.appendChild(classesBox);
 
-        var hoge = document.createTextNode("hogehoge");
-        var hogeBox = document.createElement('p');
-        hogeBox.appendChild(hoge);
-        result_element.appendChild(hogeBox);
       })
 
 
