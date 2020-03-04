@@ -1,53 +1,303 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>打音判定</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-    <script>
-    
-    
-    
-    
-    </script>
+<head>
+  <meta charset="utf-8">
+  <title>打音判定</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  <script>
+    $(function () {
+      $('#btn_start_recording').on('click', function () {
+        startRecording();
+      })
+
+      $('#btn_stop_recording').on('click', function () {
+        endRecording();
+      })
+
+      $('#btn_classification').on('click', function () {
+        classification();
+      })
+
+    })
+    // ///////////////////////////////////////////
+    // 録音関係
+    // ///////////////////////////////////////////
+
+    // 変数定義
+    let localMediaStream = null;
+    let localScriptProcessor = null;
+    let audioSampleRate = null;
+    let audioContext = null;
+    let bufferSize = 1024;
+    let audioData = []; // 録音データ
+    let recordingFlg = false;
+    let dl = null;
+    let blob = null;
+    let geo_json = [];
+
+    // 録音バッファ作成（録音中自動で繰り返し呼び出される）
+    function onAudioProcess(e) {
+      if (!recordingFlg) return;
+      console.log('onAudioProcess');
+
+      // 音声のバッファを作成
+      let input = e.inputBuffer.getChannelData(0);
+      let bufferData = new Float32Array(bufferSize);
+      for (let i = 0; i < bufferSize; i++) {
+        bufferData[i] = input[i];
+      }
+      audioData.push(bufferData);
+    }
+
+    // 解析開始
+    function startRecording(evt_stream) {
+      // 画面アクセス時にマイクを取得
+      console.log('startRecording');
+      recordingFlg = true;
+
+      // 取得されている音声ストリームの録音を開始
+      localMediaStream = evt_stream;
+
+      if (!navigator || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Missing support for navigator.mediaDevices.getUserMedia') // temp: helps when testing for strange issues on ios/safari
+        return
+      }
+
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      // サンプルレートを保持しておく
+      audioSampleRate = audioContext.sampleRate;
+
+      let scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+      localScriptProcessor = scriptProcessor;
+
+      if (audioContext.createMediaStreamDestination) {
+        destinationNode = audioContext.createMediaStreamDestination()
+      }
+      else {
+        destinationNode = audioContext.destination
+      }
+
+      // safariで Web Audio APIを動かすため、先にaudioContextを生成し、UserMediaを生成する
+      return navigator.mediaDevices.getUserMedia({ audio: true })
+        .then((stream) => {
+          this._startRecordingWithStream(stream, destinationNode, scriptProcessor)
+        })
+        .catch((error) => {
+          alert('Error with getUserMedia: ' + error.message) // temp: helps when testing for strange issues on ios/safari
+          console.log(error)
+        })
+    }
+
+    function _startRecordingWithStream(stream, destinationNode, scriptProcessor) {
+      // ループ処理のセット
+      let mediastreamsource = audioContext.createMediaStreamSource(stream);
+      mediastreamsource.connect(scriptProcessor);
+      scriptProcessor.onaudioprocess = onAudioProcess;
+      console.log('startRecording scriptProcessor.connect(audioContext.destination)');
+      scriptProcessor.connect(destinationNode);
+    }
+
+    // 解析終了
+    function endRecording() {
+      console.log('endRecording');
+      recordingFlg = false;
+
+      // 録音できたので録音データをwavにしてinputに配置＆再生ボタンに登録
+      blob = exportWAV(audioData);
+
+      // データ送信用のinputタグを取得
+      let wave_tag = document.getElementById('demo_speaking_wave_file');
+
+      // base64加工
+      let reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = function () {
+        base64data = reader.result;
+        // console.log('base64data');
+        // console.log(base64data);
+        //wave_tag.value = base64data;
+      };
+
+      let myURL = window.URL || window.webkitURL;
+      let url = myURL.createObjectURL(blob);
+      //dl = document.querySelector("#dl");
+
+      dl = "test";
+
+      // audioタグに録音データをセット
+      let player = document.getElementById('player');
+      player.src = url;
+      player.load();
+
+      // audioDataをクリア
+      localMediaStream = null;
+      localScriptProcessor = null;
+      audioContext.close()
+      audioContext = null;
+      audioData = []; // 録音データ
+    }
+
+    // ///////////////////////////////////////////
+    // waveファイル作成処理
+    // ///////////////////////////////////////////
+
+    function exportWAV(audioData) {
+
+      let encodeWAV = function (samples, sampleRate) {
+        let buffer = new ArrayBuffer(44 + samples.length * 2);
+        let view = new DataView(buffer);
+
+        let writeString = function (view, offset, string) {
+          for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+          }
+        };
+
+        let floatTo16BitPCM = function (output, offset, input) {
+          for (let i = 0; i < input.length; i++ , offset += 2) {
+            let s = Math.max(-1, Math.min(1, input[i]));
+            output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+          }
+        };
+
+        writeString(view, 0, 'RIFF');  // RIFFヘッダ
+        view.setUint32(4, 32 + samples.length * 2, true); // これ以降のファイルサイズ
+        writeString(view, 8, 'WAVE'); // WAVEヘッダ
+        writeString(view, 12, 'fmt '); // fmtチャンク
+        view.setUint32(16, 16, true); // fmtチャンクのバイト数
+        view.setUint16(20, 1, true); // フォーマットID
+        view.setUint16(22, 1, true); // チャンネル数
+        view.setUint32(24, sampleRate, true); // サンプリングレート
+        view.setUint32(28, sampleRate * 2, true); // データ速度
+        view.setUint16(32, 2, true); // ブロックサイズ
+        view.setUint16(34, 16, true); // サンプルあたりのビット数
+        writeString(view, 36, 'data'); // dataチャンク
+        view.setUint32(40, samples.length * 2, true); // 波形データのバイト数
+        floatTo16BitPCM(view, 44, samples); // 波形データ
+
+        return view;
+      };
+
+      let mergeBuffers = function (audioData) {
+        let sampleLength = 0;
+        for (let i = 0; i < audioData.length; i++) {
+          sampleLength += audioData[i].length;
+        }
+        let samples = new Float32Array(sampleLength);
+        let sampleIdx = 0;
+        for (let i = 0; i < audioData.length; i++) {
+          for (let j = 0; j < audioData[i].length; j++) {
+            samples[sampleIdx] = audioData[i][j];
+            sampleIdx++;
+          }
+        }
+        return samples;
+      };
+
+      let dataview = encodeWAV(mergeBuffers(audioData), audioSampleRate);
+      let audioBlob = new Blob([dataview], { type: 'audio/wav' });
+
+      return audioBlob;
+
+    }
+
+    function audioPlay() {
+      let play_button = document.getElementById("btn_play_pause");
+      play_button.onclick = new Function("audioPause();");
+      play_button.innerText = "停止";
+      document.getElementById("player").play();
+    }
+
+    function audioPause() {
+      let play_button = document.getElementById("btn_play_pause");
+      play_button.onclick = new Function("audioPlay();");
+      play_button.innerText = "再生";
+      document.getElementById("player").pause();
+    }
+  </script>
 
 
+  <!--画面ロード時に発火するスクリプト-->
+  <script type="text/javascript">
+    window.onload = onLoad;
+    var objResult = {"images":[{"classifiers":[{"classifier_id":"spectrogram_579117281","name":"spectrogram","classes":[{"class":"normal","score":0.92}]}],"image":"085a5fdb-4df1-47bf-942c-360826d9c5c6.png"}],"images_processed":1,"custom_classes":2}
+
+    function onLoad() {
+      target = document.getElementById("result");
+      target.innerHTML = "JavaScriptが実行されました。";
+
+      //表示している内容をクリアする
+      if (target.hasChildNodes()) {
+        for (var i = target.childNodes.length - 1; i >= 0; i--) {
+          target.removeChild(target.childNodes[i]);
+        }
+      }
+
+      //-----------------------------
+      //判定結果（JSON形式）からデータを取得, 表示値を生成
+      //-----------------------------
+      // classifierId+name
+      var classifier;
+      classifier = document.createTextNode("classifierId=" + objResult.images[0].classifiers[0].classifier_id + ", classifierName=" + objResult.images[0].classifiers[0].name);
+      var classifierBox = document.createElement('p');
+      classifierBox.appendChild(classifier);
+      target.appendChild(classifierBox);
+
+      // classes
+      var classes;
+      classes = document.createTextNode("className=" + objResult.images[0].classifiers[0].classes[0].class + ", score=" + objResult.images[0].classifiers[0].classes[0].score);
+      var classesBox = document.createElement('p');
+      classesBox.appendChild(classes);
+      target.appendChild(classesBox);
+
+      console.log('don!');
 
 
+    }
 
-
-    <style type="text/css">
+  </script>
+  <style type="text/css">
     <!--
-  
-    
-    --> 
-    </style>
-    </head>
-    <body>
-　　<center>
-　　<div class="box3">
+    .box3 {
+      padding: 0.5em 1em;
+      margin: 2em 0;
+      color: #2c2c2f;
+      background: #cde4ff;
+      /*背景色*/
+    }
+
+    .box3 p {
+      margin: 0;
+      padding: 0;
+    }
+
+    example {
+      margin: 10px auto;
+      width: 50px;
+      background: orange;
+    }
+    -->
+  </style>
+</head>
+
+<body>
+  <center>
+    <div class="box3">
       <h1>打音の判定</h1>
+      <p>TODO:データはダミーです</p>
     </div>
-    
-
-    <p>結果表示（イメージ：正常 or 異常）</p>
-    <p>MAPに表示するために、DBに送信された情報を現在地情報情報を保存するようにしたい</p>
-
     <audio id="player" controls></audio><br><br><br>
-  
-    <button type="button" style="width:50%;padding:10px;font-size:30px;" name="button" 
-    class="classification" id="btn_classification">MAP表示</button><br><br><br>
 
-    <button type="button" style="width:50%;padding:10px;font-size:30px;" name="button" 
-    class="classification" id="btn_classification">打音判定に戻る</button><br><br><br>
-  
+    <button type="button" style="width:50%;padding:10px;font-size:30px;" name="button" class="classification"
+      id="btn_classification">MAP表示</MAP></button><br><br><br>
     <div class="panel-footer" style="height:100px;">
       <div id="result"></div>
     </div>
-　　</center>
-  </body>
+    　　
+  </center>
+</body>
+
 </html>
