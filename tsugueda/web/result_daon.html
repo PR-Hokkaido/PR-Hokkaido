@@ -116,9 +116,6 @@
       reader.readAsDataURL(blob);
       reader.onloadend = function () {
         base64data = reader.result;
-        // console.log('base64data');
-        // console.log(base64data);
-        //wave_tag.value = base64data;
       };
 
       let myURL = window.URL || window.webkitURL;
@@ -223,7 +220,9 @@
   <!--画面ロード時に発火するスクリプト-->
   <script type="text/javascript">
     window.onload = onLoad;
-    var objResult = {"images":[{"classifiers":[{"classifier_id":"spectrogram_579117281","name":"spectrogram","classes":[{"class":"normal","score":0.92}]}],"image":"085a5fdb-4df1-47bf-942c-360826d9c5c6.png"}],"images_processed":1,"custom_classes":2}
+
+    //TODO:ダミーデータの設定
+    var objResult = { "images": [{ "classifiers": [{ "classifier_id": "spectrogram_579117281", "name": "spectrogram", "classes": [{ "class": "normal", "score": 0.92 }] }], "image": "085a5fdb-4df1-47bf-942c-360826d9c5c6.png" }], "images_processed": 1, "custom_classes": 2 }
 
     function onLoad() {
       target = document.getElementById("result");
@@ -239,16 +238,18 @@
       //-----------------------------
       //判定結果（JSON形式）からデータを取得, 表示値を生成
       //-----------------------------
-      // classifierId+name
-      var classifier;
-      classifier = document.createTextNode("classifierId=" + objResult.images[0].classifiers[0].classifier_id + ", classifierName=" + objResult.images[0].classifiers[0].name);
-      var classifierBox = document.createElement('p');
-      classifierBox.appendChild(classifier);
-      target.appendChild(classifierBox);
-
       // classes
       var classes;
-      classes = document.createTextNode("className=" + objResult.images[0].classifiers[0].classes[0].class + ", score=" + objResult.images[0].classifiers[0].classes[0].score);
+      var className = objResult.images[0].classifiers[0].classes[0].class;
+      var score = objResult.images[0].classifiers[0].classes[0].score * 100 + "%";
+      if (className == "normal") {
+        classes = document.createTextNode("正常です(" + score + ")");
+
+      } else {
+        classes = document.createTextNode("異常です(" + score + ")");
+        
+      }
+
       var classesBox = document.createElement('p');
       classesBox.appendChild(classes);
       target.appendChild(classesBox);
