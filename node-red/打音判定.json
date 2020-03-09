@@ -126,7 +126,7 @@
         "method": "POST",
         "ret": "obj",
         "paytoqs": false,
-        "url": "http://184.172.247.52:30872/spectrogram",
+        "url": "http://184.172.229.100:30872/spectrogram",
         "tls": "",
         "persist": false,
         "proxy": "",
