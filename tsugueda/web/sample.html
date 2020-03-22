@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ＰＲ北海道</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <style type="text/css">
+    <!--
+    .box3 {
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    color: #2c2c2f;
+    background: #cde4ff;/*背景色*/
+    }
+    .box3 p {
+    margin: 0; 
+    padding: 0;
+    }
+　　example {
+    margin: 10px auto;
+    width:50px;
+    background: orange;
+    }
+    
+    -->
+    </style>
+    </head>
+    <body>
+　　<center>
+　　<div class="box3">
+    <h1>ＰＲ北海道</h1>
+    </div>
+    <form id="form1" action="/image-recognition" method="get">
+	    <button type="submit" style="width:50%;padding:10px;font-size:30px;" name="button">画像認識</button><br><br><br>
+    </form>
+    <form id="form2" action="/pr-hokkiado-classification" method="get">
+        <button type="submit" style="width:50%;padding:10px;font-size:30px;" name="button">打音判定</button><br><br><br>
+    </form>
+    <form id="form2" action="/showmap" method="get">
+        <button type="submit" style="width:50%;padding:10px;font-size:30px;" name="button">異常箇所MAPを表示</button><br><br><br>
+    </form>
+　　</center>
+  </body>
+</html>

@@ -15,73 +15,122 @@
 
     #map {
       position: absolute;
-      top: 0;
-      bottom: 0;
+      top: 175px;
+      bottom: 25px;
       width: 100%;
+    }
+
+    .box3 {
+      padding: 0.5em 1em;
+      margin: 2em 0;
+      color: #2c2c2f;
+      background: #cde4ff;
+      /*背景色*/
+    }
+
+    .box3 p {
+      margin: 0;
+      padding: 0;
+    }
+
+    example {
+      margin: 10px auto;
+      width: 50px;
+      background: orange;
     }
   </style>
 </head>
 
 <body>
-  <div id="map"></div>
-  <script>
- //---------------
- //Mapについての設定
- //---------------
-//  初期表示設定
-    mapboxgl.accessToken = 'pk.eyJ1IjoieS10c3VndWVkYSIsImEiOiJjazZvYzV4YjAwZnozM2ttbGo3aDB2NGloIn0.wK79n0iuGLVP0RznXUJChQ';
-    var map = new mapboxgl.Map({
-      container: 'map', // container id
-      style: 'mapbox://styles/mapbox/streets-v11',
-      center: [141.350755, 43.068661], // 初期表示（経度, 緯度）
-      zoom: 10 // starting zoom
-    });
+  <center>
+    <div class="box3">
+      <h2>異常箇所結果Map</h2>
+    </div>
 
-    // Add zoom and rotation controls to the map.
-    map.addControl(new mapboxgl.NavigationControl());
-
- //---------------
- //ポインタの設定
- //---------------
-    map.on('load', function() {
-      // Mapの種類を設定
-      map.addSource('national-park', {
-      'type': 'geojson',
-
-      // GPSの値を設定し、ポイントが表示されるようにする
-      'data': {
-        'type': 'FeatureCollection',
-        'features': [
-            
-            //1つ目
-          {
-          'type': 'Feature',
-            'geometry': {
-            'type': 'Point',
-            'coordinates': [141.345391, 43.058157]
-            }
-          },
-          //2つ目
-          {
-          'type': 'Feature',
-            'geometry': {
-            'type': 'Point',
-            'coordinates': [141.330199, 43.063958]
-            }
-          },
-          //３つ目
-          {
-          'type': 'Feature',
-            'geometry': {
-            'type': 'Point',
-            'coordinates': [141.310973, 43.071137]
-            }
-          }
-        ]
-        }
+    <div id="map"></div>
+    <script>
+      //---------------
+      //Mapについての設定
+      //---------------
+      //  地図を作成
+      mapboxgl.accessToken = 'pk.eyJ1IjoiYXNha2F3YTciLCJhIjoiY2s2aHRmNWZwMmhncDNrbWd4ampxamh4cSJ9.MSCzgEW8zCHs38HUbzJ6dQ';
+      var map = new mapboxgl.Map({
+        container: 'map', // container id
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [141.350755, 43.068661], // 初期表示（経度, 緯度）
+        zoom: 10 // starting zoom
       });
-    //---------------
-      map.addLayer({
+
+      //---------------
+      //ポインタの設定(ダミーデータ)
+      //---------------
+      var data = {
+        'type': 'geojson',
+        'data': {
+          'type': 'FeatureCollection',
+          // GPSの値を設定
+          'features': [
+            //1つ目
+            {
+              'type': 'Feature',
+              'geometry': {
+                'type': 'Point',
+                'coordinates': [141.400349, 43.062974]
+              }
+            },
+
+            //2つ目
+            {
+              'type': 'Feature',
+              'geometry': {
+                'type': 'Point',
+                'coordinates': [141.318520, 43.091557]
+              }
+            },
+
+            //3つ目
+            {
+              'type': 'Feature',
+              'geometry': {
+                'type': 'Point',
+                'coordinates': [141.313456, 43.091000]
+              }
+            }
+          ]
+        }
+      };
+
+      // 追加したい緯度経度の情報
+      //TODO cloudantで取得した経度緯度情報を設定
+      var positions = [
+        { latitude: 43.041999, longitude: 141.302488 },
+        { latitude: 43.051588, longitude: 141.392455 }
+      ];
+
+
+      var features = data.data.features;
+      for (var i = 0; i < Object.keys(positions).length; i++) {
+
+        var coord = {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Point',
+            'coordinates': [positions[i].longitude, positions[i].latitude]
+          }
+        };
+        features = features.concat(coord);
+      }
+
+      data.data.features = features;
+      console.log(data);
+
+      //地図ナビゲーションコントローラの追加
+      map.addControl(new mapboxgl.NavigationControl());
+
+      map.on('load', function () {
+        map.addSource('national-park', data);
+
+        map.addLayer({
           'id': 'park-boundary',
           'type': 'fill',
           'source': 'national-park',
@@ -89,21 +138,23 @@
             'fill-color': '#228822',
             'fill-opacity': 0.4
           },
-        'filter': ['==', '$type', 'Polygon']
-      });
-    
-      map.addLayer({
-        'id': 'park-volcanoes',
-        'type': 'circle',
-        'source': 'national-park',
+          'filter': ['==', '$type', 'Polygon']
+        });
+
+        map.addLayer({
+          'id': 'park-volcanoes',
+          'type': 'circle',
+          'source': 'national-park',
           'paint': {
             'circle-radius': 6,
             'circle-color': '#B42222'
           },
-        'filter': ['==', '$type', 'Point']
+          'filter': ['==', '$type', 'Point']
+        });
       });
-    });
-  </script>
+    </script>
+    　　
+  </center>
 
 </body>
 
