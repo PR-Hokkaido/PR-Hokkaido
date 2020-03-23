@@ -15,8 +15,8 @@
 
     #map {
       position: absolute;
-      top: 175px;
-      bottom: 25px;
+      top: 200px;
+      bottom: 10px;
       width: 100%;
     }
 
@@ -35,19 +35,27 @@
 
     example {
       margin: 10px auto;
-      width: 50px;
+      width: 25px;
       background: orange;
     }
   </style>
 </head>
 
 <body>
-  <center>
-    <div class="box3">
-      <h2>異常箇所結果Map</h2>
-    </div>
+  
 
-    <div id="map"></div>
+  <div class="box3"  style="text-align: center">
+    <h2>異常箇所結果Map</h2>
+  </div>
+
+  <div style="height:25px;">
+    <form id="form2" action="/index" method="get">
+      <button type="submit" style="width:10%;padding:10px;margin:10px;font-size:14px;" name="button">目次へ戻る</button>
+    </form>
+  </div>
+
+  </div style="text-align: center">
+  <div  id="map" >
     <script>
       //---------------
       //Mapについての設定
@@ -154,7 +162,8 @@
       });
     </script>
     　　
-  </center>
+
+  </div >
 
 </body>
 
