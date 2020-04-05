@@ -1,112 +1,30 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>画像認識</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script>
-    window.onload = () => {
-	  const video  = document.querySelector("#video_camera");
-	  const canvas = document.querySelector("#canvas_picture");
-	  const se     = document.querySelector('#audio_se');
+<title>Visual Recognition</title>
+<h1>Classify Images by Visual Recognition </h1>
+<img src="{{result.images.0.image}}" width="320" />
+<h2>結果</h2>
+これは
+{{result.images.0.classifiers.0.classes.0.class}}
+（確信度:{{result.images.0.classifiers.0.classes.0.score}}
+)です。
 
-	  /** カメラ設定 */
-	  const constraints = {
-	    audio: false,
-	    video: {
-	      width: 300,
-	      height: 200,
-	      facingMode: "user"   // フロントカメラを利用する
-	      // facingMode: { exact: "environment" }  // リアカメラを利用する場合
-	    }
-	  };
-
-	  /**
-	   * カメラを<video>と同期
-	   */
-	  navigator.mediaDevices.getUserMedia(constraints)
-	  .then( (stream) => {
-	    video.srcObject = stream;
-	    video.onloadedmetadata = (e) => {
-	      video.play();
-	    };
-	  })
-	  .catch( (err) => {
-	    console.log(err.name + ": " + err.message);
-	  });
-
-	  /**
-	   * 撮影ボタン
-	   */
-	   document.querySelector("#btn_recording").addEventListener("click", () => {
-	    const ctx = canvas.getContext("2d");
-
-	    // 演出的な目的で一度映像を止めてSEを再生する
-	    video.pause();  // 映像を停止
-	    se.play();      // シャッター音
-	    setTimeout( () => {
-	      video.play();    // 0.5秒後にカメラ再開
-	    }, 500);
-
-	    // canvasに画像を貼り付ける
-	    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-	    // DataURLに変換
-	    var dataURL = canvas.toDataURL("image/jpeg");                 // DataURLに変換
-	    var base64 = dataURL.replace(/^.*,/, '');                     // プレフィックスを削除してBase64部分だけ取り出し
-	    form1.url.value = base64;
-	    console.log(form1.url.value);
-	  });
-	};
-    </script>
-    <style type="text/css">
-    <!--
-    .box3 {
-    padding: 0.5em 1em;
-    margin: 2em 0;
-    color: #2c2c2f;
-    background: #cde4ff;/*背景色*/
-    }
-    .box3 p {
-    margin: 0; 
-    padding: 0;
-    }
-　　example {
-    margin: 10px auto;
-    width:50px;
-    background: orange;
-    }
-    
-    -->
-    canvas, video{
-    border: 1px solid gray;
-    }
-    </style>
-    </head>
-    <body>
-　　<center>
-　　<div class="box3">
-    <h1>画像認識</h1>
-    </div>
-    
-  　<p>撮影ボタンでカメラ画像を撮影し、判定ボタンで画像認識を開始します</p>
-  　<video id="video_camera" width="300" height="200"></video>
-    <canvas id="canvas_picture" width="300" height="200"></canvas>
-    <form id="form1" action="/image-classification" method="post">
-	    <button type="button" style="width:50%;padding:10px;font-size:30px;" name="button" class="recording" id="btn_recording">撮影</button><br><br><br>
-	    <button type="submit" style="width:50%;padding:10px;font-size:30px;" name="button" class="classification" id="btn_classification">判定</button><br><br><br>
-	    <input type="hidden" name="url" value=""/>
-    </form>
-    <form id="form2" action="/index" method="get">
-	    <button type="submit" style="width:50%;padding:10px;font-size:30px;" name="button" class="return" id="btn_return">戻る</button><br><br><br>
-    </form>
-    <audio id="audio_se" preload="auto">
-        <source src="camera-shutter1.mp3" type="audio/mp3">
-    </audio>
-    <div class="panel-footer" style="height:100px;">
-      <div id="result"></div>
-    </div>
-　　</center>
-  </body>
-</html>
+{{#result}}
+{{#images}}
+{{#classifiers}}
+<table border="1">
+	<tr>
+		<th>分類名</th>
+		<th>確信度</th>
+	</tr>
+	{{#classes}}
+	<tr>
+		<td> {{class}} </td>
+		<td> {{score}} </td>
+	</tr>
+	{{/classes}}
+	{{/classifiers}}
+</table>
+{{/images}}
+{{/result}}
+<form id="form" action="/image-recognition" method="get">
+	<button type="submit" id="return">戻る</button>
+</form>
